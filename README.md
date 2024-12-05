@@ -1,3 +1,3 @@
 # BIMM 143
 
-My test etc
+- Lab 1[Introduction]()
