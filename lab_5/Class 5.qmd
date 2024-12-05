@@ -1,7 +1,7 @@
 ---
 title: "Class 5: database with ggplot"
 author: "Longmei A17012012"
-format: pdf
+format: gfm
 ---
 
 
