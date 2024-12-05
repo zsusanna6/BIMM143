@@ -10,3 +10,5 @@ Course files:
 - Lab 4 [Bioinformatics data analysis with R]()
 
 - Lab 5 [Data exploration and visualization in R](https://github.com/zsusanna6/BIMM143/blob/main/lab_5/Class%205.md)
+
+- Lab 6 [R functions and R packages from CRAN and BioConductor](https://github.com/zsusanna6/BIMM143/blob/main/lab_6/Lecture6_homework.md)
