@@ -1,0 +1,103 @@
+---
+title: "find_gene_prj"
+author: "Longmei Zhang A17012012"
+format: html
+---
+
+```{r}
+library(bio3d)
+```
+```{r}
+alignment_file <- "your_alignment_file.fasta"
+
+# Read the FASTA alignment into R using Bio3D
+alignment <- read.fasta("find_gene.fst")
+
+# Check the alignment content (optional)
+print(alignment)
+```
+```{r}
+alignment$id
+```
+
+
+```{r}
+names <- c("Slertlet Fish", "parasitic worm: Novel protein", "Cape Cliff lizard","Human", "Alpine marmot", "wood mouse",  "California mouse",  "Brown bear")  # Replace these with your desired names
+
+# Replace the sequence names
+alignment$id = names
+
+# Verify the changes
+alignment$id
+
+```
+
+
+```{r}
+seq_identity_matrix <- seqidentity(alignment)
+
+# Print the matrix to check (optional)
+print(seq_identity_matrix)
+```
+
+　　 
+```{r}
+# Generate the heatmap
+
+
+# Alternatively, you can save the plot to a file
+png("sequence_identity_heatmap.png", width = 800, height = 1000)
+
+par(cex.axis = 1.5)   # Row/column label font size
+
+heatmap(
+  seq_identity_matrix,
+  col = colorRampPalette(c("blue", "white", "red"))(100),
+  margins = c(10, 10),
+  labRow = rownames(seq_identity_matrix),
+  labCol = colnames(seq_identity_matrix)
+)
+dev.off()
+
+```
+
+```{r}
+seq = "QSRRGFLLQQCLNGTRCSTPPTAAGRSEPEPFATSSLRRSSVATAPRPAAAAMTTASPSQVRQNYHQDSEAAINRQINLELYASYVYLSMSCYFDRDDVALKNFAKYFLHQSHEEREHAEKLMKLQNERGGRIFLQDIKKPDRDDWENGLNAMECALHLEKSVNQSLLELHKLATDKNDPHLCDFIETHYLNEQVKSIKELGDHVTNLRKMGAPESWHGRVSSLTSTPWDTVRAKLDFPKAIVTSLVTGGRACMAGYIX"
+```
+
+```{r}
+seq2 = "MTTASTSQVRQNYHQDSEAAINRQINLELYASYVYLSMSYYFDRDDVALKNFAKYFLHQSHEEREHAEKLMKLQNQRGGRIFLQDIKKPDCDDWESGLNAMECALHLEKNVNQSLLELHKLATDKNDPHLCDFIETHYLNEQVKAIKELGDHVTNLRKMGAPESGLAEYLFDKHTLGDSDNES"
+```
+
+
+```{r}
+blast_results <- blast.pdb(seq) 
+```
+
+
+
+```{r}
+top_hits <- blast_results[1:3]
+top_hits
+```
+
+```{r}
+annotations <- data.frame(
+  PDB_ID = character(),
+  Experimental_Technique = character(),
+  Resolution = numeric(),
+  Sequence_Identity = numeric(),
+  Source_Organism = character(),
+  stringsAsFactors = FALSE
+)
+
+
+```
+
+```{r}
+annotations
+
+# Optional: Save the results to a CSV file
+#write.csv(annotations, "top_hits_annotations.csv", row.names = FALSE)
+```
+
