@@ -1,0 +1,292 @@
+---
+title: "Lecture9: Structural Bioinformatics"
+author: "Longmei Zhang A17012012"
+format: pdf
+---
+
+# Introduction to the RCSB Protein Data Bank (PDB)
+
+
+```{r}
+table1 <- read.csv("Data Export Summary.csv")
+table1
+```
+
+> Q1: What percentage of structures in the PDB are solved by X-Ray and Electron Microscopy.
+
+83.30% of the structures are solved by X-ray, and 10.18% of the structures are solved by EM. 
+
+method 1: conversion
+Create a function to remove the comma and turn the characters into numbers
+```{r}
+num_convert <- function(col){
+  as.numeric(sub(",", "", col))
+}
+
+
+```
+
+```{r}
+# X-ray
+sum(num_convert(table1[, "X.ray"]))/ sum(num_convert(table1[, "Total"]))
+
+# EM
+sum(num_convert(table1[, "EM"]))/ sum(num_convert(table1[, "Total"]))
+
+```
+
+
+method 2: different import function
+```{r}
+library(readr)
+table <- read_csv("Data Export Summary.csv", show_col_types = FALSE)
+
+#convert the table to df and change the first column into row name
+table <- as.data.frame(table)  
+rownames(table) <- table[,1]  
+table <- table[ , -1]  
+table
+```
+
+Calculate the percentages of structures solve by X-Ray:
+```{r}
+sum(table$`X-ray`) / sum(table$Total)
+```
+Calculate the percentage of structures solve by Electron Microscopy:
+```{r}
+sum(table$`EM`) / sum(table$Total)
+```
+
+> Q2: What proportion of structures in the PDB are protein?
+
+around 86.39% of the structures are protein
+
+```{r}
+table["Protein (only)", "Total"] * 100/ sum(table$Total)
+```
+
+
+> Q3: Type HIV in the PDB website search box on the home page and determine how many HIV-1 protease structures are in the current PDB?
+
+There are 5 HIV-1 protease structures in the current PDB
+
+#  Visualizing the HIV-1 protease structure
+
+## Using Mol*
+
+Mol* is a new web-based molecualr-viewer that we will learn the basics of
+
+some custom images:
+
+![a first image from Mol*](1HSG.png)
+
+![D25 in chain A and Chain B](1HSG_2.png)
+![Surface display showing the binding site pocket](1HSG_3.png)
+
+
+> Q4: Water molecules normally have 3 atoms. Why do we see just one atom per water molecule in this structure?
+
+The molecular viewer simplified water molecules into one atom to prevent water molecule from blocking the protein structures. In this case, we can better observe the protein residues while still being able to see the interaction between residues and water molecules. 
+
+
+> Q5: There is a critical “conserved” water molecule in the binding site. Can you identify this water molecule? What residue number does this water molecule have
+
+This water molecule is water 308. It is losely interacting with the ligand and is located at the binding site. 
+
+![Water308 and its interaction with the ligand](1HSG_4.png)
+
+![Water308 in Spacefill Representation](1HSG_5.png)
+
+
+# The Bio3D package
+
+The bio3d package allows us to do all sorts of structural bioinformatic works in R
+
+Start with how it can read PDB files
+
+```{r}
+library(bio3d)
+pdb <- read.pdb("1hsg")
+pdb
+```
+
+
+```{r}
+attributes(pdb)
+```
+```{r}
+head(pdb$atom)
+```
+```{r}
+head(pdbseq(pdb))
+```
+
+> Q7: How many amino acid residues are there in this pdb object? 
+
+there are 198 amino acid residues in this pdb object
+
+```{r}
+length(pdbseq(pdb))
+```
+
+
+> Q8: Name one of the two non-protein residues? 
+
+HOH and MK1
+
+> Q9: How many protein chains are in this structure? 
+
+there are 2, chain A and chain B
+
+```{r}
+unique(pdb$atom$chain)
+```
+
+## Predicting functional motions of a single structure
+
+Lets do a bioinformatics prediction of function motions - the movements that one of these molecules needs to make to do its stuff. Use Adenylate Kinase as example. 
+
+```{r}
+adk <- read.pdb("6s36")
+adk
+```
+
+Normal mode analysis (NMA) is a structural bioinformatics method to predict protein flexibility and potential functional motions
+
+```{r}
+# Perform flexiblity prediction
+m <- nma(adk)
+plot(m)
+```
+
+write out multi-model PDB file that we can use to make an animation of the predicted motions. Can open the result in Mol*
+
+```{r}
+mktrj(m, file="adk_m7.pdb")
+```
+
+
+# Comparative structure analysis of Adenylate Kinase
+
+
+> Q10. Which of the packages above is found only on BioConductor and not CRAN? 
+
+The `msa` package is only found on BioConductor. 
+
+> Q11. Which of the above packages is not found on BioConductor or CRAN?: 
+
+Devtools and Bio3d are not found on BioConductor. 
+
+> Q12. True or False? Functions from the devtools package can be used to install packages from GitHub and BitBucket? 
+
+True. R packages found on GitHub or BitBucket can be installed using devtools::install_github() and devtools::install_bitbucket() functions.
+
+
+## Search and retrieve ADK structures
+
+Here we will find and analyze all ADK structures in the PDB database. We will start with a single database accession id "1ake_A"
+
+we perform a blast search of the PDB database to identify related structures to our query Adenylate kinase (ADK) sequence. In this particular example we use function `get.seq()` to fetch the query sequence for chain A of the PDB ID 1AKE and use this as input to `blast.pdb()`
+
+```{r}
+library(bio3d)
+aa <- get.seq("1ake_A")
+```
+
+> Q13. How many amino acids are in this sequence, i.e. how long is this sequence?
+
+
+this sequence has 214 amino acids
+
+```{r}
+aa
+```
+
+Blast the query sequence of ADK. It will set a seed position to the point of largest drop-off in normalized scores (i.e. the biggest jump in E-values). This is the default cutoff. We can also specify cutoff value. 
+
+```{r}
+b <- blast.pdb(aa)
+```
+
+```{r}
+# Plot a summary of search results
+hits <- plot(b)
+```
+
+```{r}
+# List out some 'top hits'
+head(hits$pdb.id)
+length(hits$pdb.id)
+```
+```{r}
+
+##should be commented out
+#hits <- NULL
+#hits$pdb.id <- c('1AKE_A','6S36_A','6RZE_A','3HPR_A','1E4V_A','5EJE_A','1E4Y_A','3X2S_A','6HAP_A','6HAM_A','4K46_A','3GMT_A','4PZL_A')
+```
+
+
+```{r}
+# Download releated PDB files
+files <- get.pdb(hits$pdb.id, path="pdbs", split=TRUE, gzip=TRUE)
+```
+
+
+## Align and superpose structures
+
+we will use the `pdbaln()` function to align and also optionally fit (i.e. superpose) the identified PDB structures.
+
+```{r}
+# Align releated PDBs
+pdbs <- pdbaln(files, fit = TRUE, exefile="msa")
+```
+
+```{r}
+pdbs
+```
+
+```{r}
+# Vector containing PDB codes for figure axis
+#ids <- basename.pdb(pdbs$id)
+
+# Draw schematic alignment
+#plot(pdbs, labels=ids)
+```
+## Annotate collected PDB structures
+
+The function `pdb.annotate()` provides a convenient way of annotating the PDB files we have collected. 
+
+```{r}
+#anno <- pdb.annotate(ids)
+#unique(anno$source)
+```
+
+## Principle Component Analysis
+
+Function pca() provides principal component analysis (PCA) of the structure data. In terms of protein structures PCA is used to capture major structural variations within similar protein structures (top hits of ADK)
+
+```{r}
+# Perform PCA
+pc.xray <- pca(pdbs)
+plot(pc.xray, pc.axes = c(1, 2)) # just the PC1 and PC2
+```
+```{r}
+# Visualize first principal component. Showing the structures of homolog proteins according to order from PC1. 
+pc1 <- mktrj(pc.xray, pc=1, file="pc_1.pdb")
+```
+
+
+
+Function rmsd() will calculate all pairwise RMSD values of the structural ensemble. This facilitates clustering analysis based on the pairwise structural variations:
+
+```{r}
+# Calculate RMSD
+rd <- rmsd(pdbs)
+
+# Structure-based clustering
+hc.rd <- hclust(dist(rd))
+grps.rd <- cutree(hc.rd, k=3)
+
+plot(pc.xray, 1:2, col="grey50", bg=grps.rd, pch=21, cex=1)
+```
+
