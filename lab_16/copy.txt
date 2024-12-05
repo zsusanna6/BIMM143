@@ -1,0 +1,10 @@
+This is a simple text editor called nano. 
+
+Key unix commands so far:
+
+pwd:   print currecnt directory
+cd:    change directory
+ls:    list files
+mkdir: make directory
+
+ssh -i "bimm143_A17012012.pem" ubuntu@ec2-35-167-210-82.us-west-2.compute.amazonaws.com

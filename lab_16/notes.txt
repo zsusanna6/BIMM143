@@ -1,0 +1,30 @@
+This is a simple text editor called nano. 
+
+Key unix commands so far:
+
+pwd:   print currecnt directory
+cd:    change directory
+ls:    list files
+mkdir: make directory
+
+ssh -i "~/Desktop/BIMM143/bimm143_A17012012.pem" ubuntu@ec2-35-167-210-82.us-west-2.compute.amazonaws.com
+ssh -i "~/Desktop/BIMM143/bimm143_A17012012.pem" ubuntu@ec2-35-167-210-82.us-west-2.compute.amazonaws.com:~/bimm143_lab16/mm-second.x.zebrafish.tsv results.tsv
+
+> Q. What does the star character accomplish here? Ask Barry, or your class neighbor, if you are not sure!
+
+The star character represents all the files with the extension after the star.
+In this case, it represents all the gunzip fasta files. 
+
+> Q. How many sequences are in this mouse.1.protein.faa file? Hint: Try using grep to figure this out…
+57119 sequences in mouse.1.protein.faa
+31512 sequences in mouse.2.protein.faa
+53634 sequences in zebrafish.1.protein.faa
+
+
+> Q. What happens if you run the above command without the > mm-first.fa part?
+It will display the first 2 sequences of mouse protein on the terminal
+
+> Q. What happens if you were to use two ‘>’ symbols (i.e. >> mm-first.fa)?
+
+
+> Q.How would you determine how many sequences are in the mm-second.fa file?
